@@ -1,0 +1,200 @@
+#include "../include/GameWindow.h"
+#include "../include/Message.h"
+#include <random>
+#include <vector>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+
+GameWindow::GameWindow(sf::Font *font) {
+    //Time
+    this->time_text = new sf::Text();
+    this->time_text->setCharacterSize(70);
+    this->time_text->setPosition(screenWidth/2-30, 0);
+    this->time_text->setFont(*font);
+
+    //Initial point and name
+    for (int i = 0; i < 4; i++) {
+        this->point_text.push_back(new sf::Text());
+        this->target_text.push_back(new sf::Text());
+
+        this->point_text.back()->setCharacterSize(50);
+        this->point_text.back()->setFont(*font);
+        this->target_text.back()->setCharacterSize(30);
+        this->target_text.back()->setFont(*font);
+    }
+
+    // board game
+    // std::size_t vectorLength = character_box.size();
+    // std::cout << "Length of the vector 1: " << vectorLength << std::endl;
+    char character = 'A';
+    // y = 0; x = 1 | 5
+    for(int i = 1; i < 6; i++) {
+        this->character_box.push_back(new CharacterBox(base_x + box_size * i, base_y, box_size, font, character));
+        character++;
+    }
+    // std::size_t vectorLength2 = this->character_box.size();
+    // std::cout << "Length of the vector 2: " << vectorLength2 << std::endl;
+    // y = 1 -> 3
+    for(int i = 1; i < 4; i++) {
+        int y_pos = base_y + box_size*i; 
+        for(int j = 0; j < 7; j++) {
+            int x_pos = base_x + box_size*j;
+            this->character_box.push_back(new CharacterBox(x_pos, y_pos, box_size, font, character));
+            character++;
+        }
+    }
+    // std::size_t vectorLength3 = character_box.size();
+    // std::cout << "Length of the vector 2: " << vectorLength3 << std::endl;
+    //user character
+    sf::Color listColor[4] = {sf::Color::Red, sf::Color::Blue, sf::Color::Green, sf::Color::Yellow};
+    for(int i = 0; i < 4; i++) {
+        this->avatar.push_back(new sf::CircleShape());
+        this->user_character.push_back(new sf::CircleShape());
+        
+        this->avatar.back()->setFillColor(listColor[i]);
+        this->user_character.back()->setFillColor(listColor[i]);
+
+        this->avatar.back()->setRadius(radius);
+        this->user_character.back()->setRadius(radius);
+
+        this->avatar.back()->setOutlineColor(sf::Color::White);
+        this->user_character.back()->setOutlineColor(sf::Color::White);
+
+        this->avatar.back()->setOutlineThickness(2);
+        this->user_character.back()->setOutlineThickness(2);
+    }
+
+    this->avatar.at(0)->setPosition(0 + 2, 0 + 2);
+    this->avatar.at(1)->setPosition(screenWidth - radius * 2 - 2, 0 + 2);
+    this->avatar.at(2)->setPosition(0 + 2, screenHeight - radius * 7 - 2);
+    this->avatar.at(3)->setPosition(screenWidth - radius * 2 - 2, screenHeight - radius * 7 - 2);
+
+    this->point_text.at(0)->setPosition(2, radius * 2);
+    this->point_text.at(1)->setPosition(screenWidth - 20 - 2, radius * 2);
+    this->point_text.at(2)->setPosition(2, screenHeight - radius * 5);
+    this->point_text.at(3)->setPosition(screenWidth - 20 - 2, screenHeight - radius * 5);
+    
+}
+
+GameWindow::~GameWindow(){}
+
+void GameWindow::setNumberPlayer(int input) {
+    this->nb_player = input;
+}
+int GameWindow::getNbPlayer() {
+    return this->nb_player;
+}
+
+void GameWindow::updateGame(struct update_game input) {
+    this->x = input.x;
+    this->y = input.y;
+    for(int i = 0; i < this->x.size(); i++) {
+        this->point_text.at(i)->setString(to_string(input.point.at(i)));
+        this->user_character.at(i)->setPosition(this->user_character_base_pos_x.at(i) + box_size * this->x.at(i), this->user_character_base_pos_y.at(i) + box_size * this->y.at(i));
+    }
+
+    this->nb_word_done = input.nb_word_done;
+    this->time_text->setString(to_string(input.time_left));
+
+    for(int i = 0; i < this->nb_player; i++) {
+        this->target_text.at(i)->setString(this->target.substr(this->nb_word_done.at(i)));
+    }
+    this->target_text.at(0)->setPosition(2, radius * 4 + 10);
+    this->target_text.at(1)->setPosition(screenWidth - this->target_text.at(1)->getGlobalBounds().width - 2, radius * 4 + 10);
+    this->target_text.at(2)->setPosition(2, screenHeight - radius * 3 + 10);
+    this->target_text.at(3)->setPosition(screenWidth - this->target_text.at(3)->getGlobalBounds().width - 2, screenHeight - radius * 3 + 10);
+
+}
+
+void GameWindow::updateTarget(struct update_target input) {
+    this->target = input.target;
+}
+
+void GameWindow::clearCharacterBox(sf::Font *font, std::string send_message) {
+    this->character_box.clear();
+ //================================================================
+    std::vector<int> values;
+    char* cstr = new char[send_message.length() + 1];
+    std::strcpy(cstr, send_message.c_str());
+    char* token = strtok(cstr, " ");
+
+    while (token != nullptr) {
+        values.push_back(std::stoi(token));
+        token = strtok(nullptr, " ");
+    }
+
+    char character = 'A';
+    // y = 0; x = 1 | 5
+    auto it = values.begin();
+    int randomValue = 0;
+    int i = 1;
+    cout<<5<<"\n";
+    for (it = values.begin(); it != values.begin()+5; ++it) {
+        randomValue = *it;
+        character = '@' + randomValue;
+        this->character_box.push_back(new CharacterBox(base_x + box_size * i, base_y, box_size, font, character));
+        i+=1;
+        
+    }
+    it = values.begin() + 5;
+    // y = 1 -> 3
+    for(int i = 1; i < 4; i++) {
+        int y_pos = base_y + box_size*i; 
+        for(int j = 0; j < 7; j++) {
+            int x_pos = base_x + box_size*j;
+            randomValue = *it;
+            character = '@' + randomValue;
+            this->character_box.push_back(new CharacterBox(x_pos, y_pos, box_size, font, character));
+            it += 1;
+        }
+    }
+
+}
+
+void GameWindow::drawTo(sf::RenderTarget &target) {
+    for(int i = 0; i < this->character_box.size(); i++) {
+        this->character_box.at(i)->drawTo(target);
+    }
+
+    for(int i = 0; i < this->nb_player; i++) {
+        target.draw(*this->point_text.at(i));
+        target.draw(*this->user_character.at(i));
+        target.draw(*this->avatar.at(i));
+        target.draw(*this->target_text.at(i));
+    }
+    
+    target.draw(*this->time_text);
+
+}
+
+void GameWindow::keyPressed(sf::Event ev, char *send_msg) {
+    struct rq_action rq;
+
+    switch (ev.key.code)
+    {
+    case sf::Keyboard::Space:
+        rq.action = SPACE;
+        break;
+    
+    case sf::Keyboard::Up:
+        rq.action = UP;
+        break;
+
+    case sf::Keyboard::Down:
+        rq.action = DOWN;
+        break;
+
+    case sf::Keyboard::Left:
+        rq.action = LEFT;
+        break;
+
+    case sf::Keyboard::Right:
+        rq.action = RIGHT;
+        break;
+    default:
+        break;
+    }
+    std::string char_list_msg="";
+    struct_to_message(&rq, RQ_ACTION, send_msg, char_list_msg);
+}
