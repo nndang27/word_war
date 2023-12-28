@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <unordered_map>
 #include "GameConfig.h"
 
 enum MessageType {
@@ -21,7 +22,7 @@ START,
 RQ_ACTION,
 UPDATE_GAME, UPDATE_TARGET, 
 END_GAME,
-RQ_EXIT_ROOM};
+RQ_EXIT_ROOM, RQ_CHOOSE_MODE};
 
 enum Action {UP, DOWN, LEFT, RIGHT, SPACE};
 
@@ -68,6 +69,12 @@ struct rp_logout {
 struct rq_create_room {
     MessageType type = RQ_CREATE_ROOM;
     std::string name;
+    std::string mode;
+};
+
+struct rq_choose_mode {
+    MessageType type = RQ_CHOOSE_MODE;
+    std::string mode;
 };
 
 struct rp_create_room {
@@ -132,12 +139,14 @@ struct update_game {
 struct update_target {
     MessageType type = UPDATE_TARGET;
     std::string target;
+    std::string mode;
 };
 
 struct end_game {
     MessageType type = END_GAME;
     std::vector<int> point;
     std::vector<std::string> username;
+    std::unordered_map<std::string, int> user_point_dict;
 };
 
 struct rq_exit_room {

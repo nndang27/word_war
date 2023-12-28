@@ -20,8 +20,9 @@ LobbyWindow::LobbyWindow(sf::Font *font) {
     this->userName->setPosition(10, 10);
 
     this->logout_btn = new Button(50, 550, 60, 20, font, "Logout", 16, sf::Color::Black, sf::Color::Magenta);
+    this->mode_btn = new Button(400, 450, 150, 100, font, "Mode", 26, sf::Color::Black, sf::Color::Magenta);
     this->joinRoom_btn = new Button(600, 450, 150, 100, font, "Join", 26, sf::Color::Black, sf::Color::Magenta);
-    this->createRoom_btn = new Button(800, 450, 150, 100, font, "Create", 26, sf::Color::Black, sf::Color::Magenta);
+    // this->createRoom_btn = new Button(800, 450, 150, 100, font, "Create", 26, sf::Color::Black, sf::Color::Magenta);
 
     float x_box[4] = {100, 300, 500, 700};
     float y_box = 200;
@@ -46,16 +47,18 @@ void LobbyWindow::setUsername(string username) {
 
 void LobbyWindow::update(sf::Vector2f mousePos) {
     this->logout_btn->update(mousePos);
-    this->createRoom_btn->update(mousePos);
+    // this->createRoom_btn->update(mousePos);
     this->joinRoom_btn->update(mousePos);
+    this->mode_btn->update(mousePos);
 }
 
 void LobbyWindow::drawTo(sf::RenderTarget &target) {
     target.draw(*this->main);
     target.draw(*this->userName);
     this->logout_btn->drawTo(target);
-    this->createRoom_btn->drawTo(target);
+    // this->createRoom_btn->drawTo(target);
     this->joinRoom_btn->drawTo(target);
+    this->mode_btn->drawTo(target);
 
     for(int i = 0; i < 4; i++) {
         this->listRoom.at(i)->drawTo(target);
@@ -72,6 +75,13 @@ bool LobbyWindow::logoutPressed(char *message) {
     return false;
 }
 
+bool LobbyWindow::chooseModePressed() {
+    if (this->mode_btn->isPressed()) {
+        return true;
+    }
+    return false;
+}
+
 bool LobbyWindow::joinPressed(char *message) {
     if (this->joinRoom_btn->isPressed()) {
         rq_join_room rq;
@@ -82,12 +92,12 @@ bool LobbyWindow::joinPressed(char *message) {
     return false;
 }
 
-bool LobbyWindow::createRoomPressed() {
-    if (this->createRoom_btn->isPressed()) {
-        return true;
-    }
-    return false;
-}
+// bool LobbyWindow::createRoomPressed() {
+//     if (this->createRoom_btn->isPressed()) {
+//         return true;
+//     }
+//     return false;
+// }
 
 void LobbyWindow::updateRoom(struct update_lobby input) {
     int nb_room = input.name.size();

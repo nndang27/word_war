@@ -7,15 +7,16 @@ std::vector<int> msg_length
 3, 3, //RQ_REGISTER, RP_REGISTER
 3, 4,//RQ_LOGIN, RP_LOGIN
 1, 3,//RQ_LOGOUT, RP_LOGOUT
-2, 4,//RQ_CREATE_ROOM, RP_CREATE_ROOM
+3, 4,//RQ_CREATE_ROOM, RP_CREATE_ROOM
 2, 3,//RQ_JOIN_ROOM, RP_JOIN_ROOM
 4, 4,//UPDATE_LOBBY, UPDATE_ROOM
 1, 1,//RQ_READY, RQ_START
 1,//START
 2,//RQ_ACTION,
-6, 3,//UPDATE_GAME, UPDATE_TARGET, 
-3,//END_GAME,
+6, 4,//UPDATE_GAME, UPDATE_TARGET, 
+4,//END_GAME,
 1,//RQ_EXIT_ROOM
+2,//RQ_CHOOSE_MODE
 };
 
 vector<string> split(char *input, string delimiter) {
@@ -118,7 +119,17 @@ void struct_to_message(void *p, MessageType type, char *output, std::string& cha
     {
         auto *struct_obj = (rq_create_room *)p;
         final << struct_obj->type << "\n";
-        final << struct_obj->name << "\n\0";
+        final << struct_obj->name << "\n";
+        final << struct_obj->mode << "\n\0";
+        temp = final.str();
+        strcpy(output, temp.c_str());
+        break;
+    }
+    case RQ_CHOOSE_MODE:
+    {
+        auto *struct_obj = (rq_choose_mode *)p;
+        final << struct_obj->type << "\n";
+        final << struct_obj->mode << "\n\0";
 
         temp = final.str();
         strcpy(output, temp.c_str());
@@ -310,7 +321,8 @@ void struct_to_message(void *p, MessageType type, char *output, std::string& cha
         final << struct_obj->type << "\n";
 
         final << struct_obj->target << "\n";
-        final << char_list_msg << "\n\0";
+        final << char_list_msg << "\n";
+        final << struct_obj->mode << "\n\0";
         temp = final.str();
         strcpy(output, temp.c_str());
         break;
@@ -333,6 +345,11 @@ void struct_to_message(void *p, MessageType type, char *output, std::string& cha
             final << struct_obj->point.at(i) << " ";
         }
         final << struct_obj->point.at(nb_user - 1) << "\n\0";
+        //Total point in a room
+        for(int i = 0; i < nb_user - 1; i++) {
+            final << struct_obj->user_point_dict[struct_obj->username.at(i)] << " ";
+        }
+        final << struct_obj->user_point_dict[struct_obj->username.at(nb_user - 1)] << "\n\0";
 
         temp = final.str();
         strcpy(output, temp.c_str());
@@ -432,7 +449,7 @@ rq_create_room message_to_rq_create_room(char *message) {
     auto splited_line = split(message, "\n");
     rq_create_room res;
     res.name = splited_line.at(1);
-    
+    res.mode = splited_line.at(2);
     return res;
 }
 
@@ -595,6 +612,17 @@ end_game message_to_end_game(char *message) {
         res.point.push_back(stoi(point));
     }
     
+    //total point a room
+    memset(temp, 0, sizeof(temp));    
+    strcpy(temp, splited_line.at(3).c_str());
+    splited_temp = split(temp, " ");
+
+    // for(int i=0; i < res.point.size(); i++){
+    int i=0;
+    for (auto point: splited_temp) {
+        res.user_point_dict[res.username.at(i)] =stoi(point);
+        i+=1;
+    }
     return res;
 }
 

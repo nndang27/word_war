@@ -65,7 +65,7 @@ bool Game::isEndGame() {
     return false;
 }
 
-bool Game::receivAction(struct rq_action rq, UserClient *&userClient, std::string char_list_msg ) {
+bool Game::receivAction(struct rq_action rq, UserClient *&userClient, std::string char_list_msg , std::string mode) {
     int position = -1;
     for(int i = 0; i < this->listUser.size(); i++) {
         if (this->listUser.at(i) == userClient) {
@@ -97,12 +97,7 @@ bool Game::receivAction(struct rq_action rq, UserClient *&userClient, std::strin
         break;
     case SPACE:
         char now_char;
-
-        cout<<"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
-        cout<<"String: "<<char_list_msg<<"\n";
-        cout<<"X: "<<this->x.at(position)<<"\n";
-        cout<<"Y: "<<this->y.at(position)<<"\n";
-        cout<<"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+        
         std::vector<int> values;
         char* cstr = new char[char_list_msg.length() + 1];
         std::strcpy(cstr, char_list_msg.c_str());
@@ -113,9 +108,21 @@ bool Game::receivAction(struct rq_action rq, UserClient *&userClient, std::strin
         }
 
         if(this->y.at(position) == 0 ) {
-            now_char = '`' + values[this->x.at(position)-1];
+            if(mode.compare("hard")==0){
+                now_char = '`' + values[this->x.at(position)-1];
+            }
+            else{
+                now_char = 'a' + this->x.at(position) - 1;
+            }
+            
         } else {
-            now_char = '`' + values[this->y.at(position)*7+this->x.at(position)-2];
+            if(mode.compare("hard")==0){
+                now_char = '`' + values[this->y.at(position)*7+this->x.at(position)-2];
+            }
+            else{
+                now_char = 'a' + 5 + (this->y.at(position) - 1)* 7 + this->x.at(position);
+            }
+            
         }
 
         cout <<"Pressed: "<< now_char << "Target: " << this->target.at(this->nb_word_done.at(position)) << endl;

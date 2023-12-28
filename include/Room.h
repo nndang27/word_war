@@ -4,6 +4,7 @@
 #include "User.h"
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 class UserClient;
 class Game;
@@ -11,21 +12,25 @@ class Game;
 class Room {
 private:
     std::string name;
+    std::string mode;
     std::vector<UserClient *> listUser;
     std::vector<UserClient *> disconnectedClient;
     std::vector<bool> ready;
+    std::unordered_map<std::string, int> user_point_dict;
+
     bool ingame = false;
     void setup(std::string name, std::vector<UserClient *> listUser, std::vector<bool> ready);
     
     Game *game;
 public:
     Room();
-    Room(std::string name, std::vector<UserClient *> listUser, std::vector<bool> ready);
+    Room(std::string name, std::vector<UserClient *> listUser, std::vector<bool> ready, std::string mode);
     ~Room();
 
     int getNumberUser();
     UserClient* getHost();
     std::string getName();
+    std::string getMode();
     std::string char_list_msg;
     std::vector<UserClient *> getListUser();
     std::vector<UserClient *> getOnlineClient();

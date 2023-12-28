@@ -17,8 +17,10 @@ class RoomBox;
 class LobbyWindow {
 private:
     Button *logout_btn;
-    Button *createRoom_btn;
+    // Button *createRoom_btn;
     Button *joinRoom_btn;
+    Button *mode_btn;
+
     
     std::vector<RoomBox *> listRoom;
 
@@ -39,8 +41,11 @@ public:
 
     // bool submitPressed(char *message, int *fail_type);
     bool logoutPressed(char *message);
+    bool chooseModePressed(char *message);
+
     bool joinPressed(char *message);
-    bool createRoomPressed();
+    bool chooseModePressed();
+    // bool createRoomPressed();
 };
 
 #endif

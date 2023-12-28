@@ -19,6 +19,7 @@
 #include "../include/LoginWindow.h"
 #include "../include/Notification.h"
 #include "../include/LobbyWindow.h"
+#include "../include/ModeWindow.h"
 #include "../include/CreateRoomWindow.h"
 #include "../include/JoinWindow.h"
 #include "../include/RoomWindow.h"
@@ -39,6 +40,7 @@ enum StateTypes
     ROOM,
     GAME,
     NOTIFICATION,
+    MODE,
 };
 
 class Client {
@@ -68,6 +70,7 @@ private:
     RegisterWindow *registerWindow;
     LoginWindow *loginWindow;
     LobbyWindow *lobbyWindow;
+    ModeWindow *createModeWindow;
     Notification *notification;
     CreateRoomWindow *createRoomWindow;
     JoinWindow *joinWindow;
@@ -82,6 +85,7 @@ private:
     void initRegisterWindow();
     void initLoginWindow();
     void initLobbyWindow();
+    void initModeWindow();
     void initNotification();
     void initCreateRoomWindow();
     void initJoinWindow();

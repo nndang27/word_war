@@ -57,6 +57,10 @@ void Client::initCreateRoomWindow() {
     this->createRoomWindow = new CreateRoomWindow(this->font);
 }
 
+void Client::initModeWindow() {
+    this->createModeWindow = new ModeWindow(this->font);
+}
+
 void Client::initJoinWindow() {
     this->joinWindow = new JoinWindow(this->font);
 }
@@ -88,6 +92,7 @@ Client::Client()
     this->initLobbyWindow();
     this->initNotification();
     this->initCreateRoomWindow();
+    this->initModeWindow();
     this->initJoinWindow();
     this->initRoomWindow();
     this->initGameWindow();
@@ -103,6 +108,7 @@ Client::~Client()
     delete this->lobbyWindow;
     delete this->notification;
     delete this->createRoomWindow;
+    delete this->createModeWindow;
 }
 
 const bool Client::running() const
@@ -230,13 +236,40 @@ void Client::pollEvents()
                     this->joinWindow->refresh();
                     this->state = JOIN;
                 }
-                if (this->lobbyWindow->createRoomPressed()) {
-                    this->state = CREATEROOM;
-                    this->createRoomWindow->refresh();
+                // if (this->lobbyWindow->createRoomPressed()) {
+                //     this->state = CREATEROOM;
+                //     this->createRoomWindow->refresh();
+                // }
+                if (this->lobbyWindow->chooseModePressed()) {
+                    this->state = MODE;
+                    // this->createModeWindow->refresh();
                 }
                 break;
             
             default:
+                break;
+            }
+            break;
+        case MODE:
+            switch (ev.type)
+            {
+            case sf::Event::MouseButtonPressed:
+                if (this->createModeWindow->backPressed()) {
+                    this->state = LOBBY;
+                }
+                int fail_type;
+                if (this->createModeWindow->easyModePressed(send_msg, &fail_type)) {
+                        // this->sendToServer(this->clientfd, send_msg);
+                        // this->rcvFromServer(this->clientfd, rcv_msg);
+                        this->state = CREATEROOM;
+
+                }
+                if (this->createModeWindow->hardModePressed(send_msg, &fail_type)) {
+                        // this->sendToServer(this->clientfd, send_msg);
+                        // this->rcvFromServer(this->clientfd, rcv_msg);
+                        this->state = CREATEROOM;
+
+                }
                 break;
             }
             break;
@@ -249,10 +282,10 @@ void Client::pollEvents()
             
             case sf::Event::MouseButtonPressed:
                 if (this->createRoomWindow->backPressed()) {
-                    this->state = LOBBY;
+                    this->state = MODE;
                 }
                 int fail_type;
-                if (createRoomWindow->submitPressed(send_msg, &fail_type)) {
+                if (this->createRoomWindow->submitPressed(send_msg, &fail_type, this->createModeWindow->mode)) {
                     if(fail_type == 0) {
                         this->sendToServer(this->clientfd, send_msg);
                         this->rcvFromServer(this->clientfd, rcv_msg);
@@ -354,6 +387,9 @@ void Client::update()
     case CREATEROOM:
         this->createRoomWindow->update(this->mousePosView);
         break;
+    case MODE:
+        this->createModeWindow->update(this->mousePosView);
+        break;
     case JOIN:
         this->joinWindow->update(this->mousePosView);
         break;
@@ -392,6 +428,9 @@ void Client::render()
         break;
     case CREATEROOM:
         this->createRoomWindow->drawTo(*this->window);
+        break;
+    case MODE:
+        this->createModeWindow->drawTo(*this->window);
         break;
     case JOIN:
         this->joinWindow->drawTo(*this->window);
@@ -529,6 +568,16 @@ void Client::rp_end_game(char *message) {
         notif << res.username.at(i) << ": " << res.point.at(i) << "\n";
     }
 
+    for(int j = 0; j < this->gameWindow->getNbPlayer(); j++) {
+        for (auto i = 0; i < 4; ++i) {
+            if(this->roomWindow->getUsernameList().at(i).compare(res.username.at(j)) == 0){
+                cout<<"String: "<<std::to_string(res.user_point_dict[res.username.at(j)])<<"\n";
+                this->roomWindow->getUserScoreList().at(i)->setString(res.username.at(j)+" "+std::to_string(res.user_point_dict[res.username.at(j)]));
+            }
+        }
+    }
+
+    // this->roomWindow-
     this->notification->setText("End Game!!", 50, notif.str(), 30);
 }
 
@@ -629,15 +678,9 @@ bool Client::msg_handle(char *message) {
                 getmessage(&splited_line, UPDATE_GAME, c_temp);
                 this->rp_update_game(c_temp);
                 break;
-            case UPDATE_TARGET:
-                getmessage(&splited_line, UPDATE_TARGET, c_temp);
-                // auto splited_line = split(c_temp, "\n");
-                cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"<<"\n";
-                cout<<c_temp<<"\n";
-                this->rp_update_target(c_temp);
-                this->rp_resetCharacterBox(c_temp);
-                break;
+
             case END_GAME:
+
                 getmessage(&splited_line, END_GAME, c_temp);
                 this->rp_end_game(c_temp);
                 break;
@@ -646,9 +689,19 @@ bool Client::msg_handle(char *message) {
                 getmessage(&splited_line, RP_JOIN_ROOM, c_temp);
                 this->rp_joinRoom(c_temp);
                 break;
-        
-            default:
+            case UPDATE_TARGET:
+                getmessage(&splited_line, UPDATE_TARGET, c_temp);
+                // auto splited_line = split(c_temp, "\n");
+                this->rp_update_target(c_temp);
+                auto splited_line = split(c_temp, "\n");
+                std::string values = splited_line.at(3);
+                if(values.compare("hard") == 0){
+                    this->rp_resetCharacterBox(c_temp);
+                }
+                
                 break;
+            // default:
+            //     break;
         }
     }
     return true;

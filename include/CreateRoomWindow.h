@@ -18,7 +18,7 @@ public:
     void update(sf::Vector2f mousePos);
     void typedOn(sf::Event ev);
     void drawTo(sf::RenderTarget &target);
-    bool submitPressed(char *message, int *fail_type);
+    bool submitPressed(char *message, int *fail_type, std::string mode);
     bool backPressed();
     
 };

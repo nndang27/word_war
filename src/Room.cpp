@@ -11,11 +11,17 @@ using namespace std;
 
 Room::Room() {}
 
-Room::Room(string name, vector<UserClient *> listUser, vector<bool> ready) {
+Room::Room(string name, vector<UserClient *> listUser, vector<bool> ready, string mode) {
     this->name = name;
+    this->mode = mode;
     this->listUser = listUser;
     this->ready = ready;
-
+    cout<<"HELOOO\n";
+    for(int i=0; i<this->listUser.size(); i++){
+        this->user_point_dict[this->listUser.at(i)->getUser()->getUsername()] = 0;
+    }
+    cout<<"FINISHH\n";
+    //Character list random
     std::vector<int> values(26);
     std::iota(values.begin(), values.end(), 1);
     std::random_device rd;
@@ -64,6 +70,10 @@ void Room::resetReady() {
 
 string Room::getName() {
     return this->name;
+}
+
+string Room::getMode() {
+    return this->mode;
 }
 
 int Room::getNumberUser() {
@@ -130,6 +140,12 @@ void Room::endGame() {
     struct end_game res = Server::to_struct_end_game(room);
     char send_msg[BUFF_SIZE + 1];
     std::string char_list_msg="";
+
+    for(int i=0; i < this->listUser.size(); i++){
+        this->user_point_dict[this->listUser.at(i)->getUser()->getUsername()] += res.point.at(i);
+    }
+    res.user_point_dict = this->user_point_dict;
+
     struct_to_message(&res, END_GAME, send_msg, char_list_msg);
 
     for(auto dClient: this->disconnectedClient) {

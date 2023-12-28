@@ -41,7 +41,7 @@ public:
     void updateRandomTarget();
     void secondPass();
     //return true if need update target
-    bool receivAction(struct rq_action, UserClient *&userClient, std::string char_list_msg);
+    bool receivAction(struct rq_action, UserClient *&userClient, std::string char_list_msg, std::string mode);
 
     bool isEndGame();
 };

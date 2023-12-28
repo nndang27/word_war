@@ -19,8 +19,19 @@ RoomWindow::RoomWindow(sf::Font* font)
         this->ready.push_back(false);
     }
 
+    for (int i = 0; i < 4; i++) {
+        sf::Text *a = new sf::Text();
+        a->setString("---") ;
+        a->setFont(*font);
+        a->setFillColor(sf::Color::White);
+        a->setCharacterSize(30);
+        a->setPosition(800, 20*(i));
+        this->user_score_list.push_back(a);
+
+    }
+
     this->main = new sf::Text();
-    this->main->setString("Room: " + this->name);
+    this->main->setString("Roommm: " + this->name);
     this->main->setFont(*font);
     this->main->setFillColor(sf::Color::White);
     this->main->setCharacterSize(60);
@@ -46,6 +57,10 @@ string RoomWindow::getName()
 vector<string> RoomWindow::getUsernameList()
 {
     return this->userNameList;
+}
+vector<sf::Text *> RoomWindow::getUserScoreList()
+{
+    return this->user_score_list;
 }
 
 int RoomWindow::getNumberPlayer()
@@ -115,6 +130,10 @@ void RoomWindow::drawTo(sf::RenderTarget& target)
 
     for (int i = 0; i < 4; i++) {
         this->userBoxList.at(i)->drawTo(target);
+    }
+
+    for (int i = 0; i < 4; i++) {
+        target.draw(*this->user_score_list.at(i));
     }
 }
 

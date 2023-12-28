@@ -27,7 +27,8 @@ private:
     std::vector <std::string> userNameList;
     sf::Font *font;
     sf::Text *main;
-
+    sf::Text *main2;
+    std::vector <sf::Text *> user_score_list;
     bool isHost;
 public:
     RoomWindow(sf::Font *font);
@@ -39,6 +40,8 @@ public:
 
     std::string getName();
     std::vector<std::string> getUsernameList();
+    std::vector<sf::Text *> getUserScoreList();
+    
     int getNumberPlayer();
     void setName(std::string name);
 

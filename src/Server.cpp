@@ -243,8 +243,7 @@ void Server::rq_createRoom(char *rq_createRoom, char *rp_createRoom, UserClient 
         }
 
         if (check) {
-
-            Room *newRoom = new Room(rq.name, vector<UserClient *>{userClient}, vector<bool>{false});
+            Room *newRoom = new Room(rq.name, vector<UserClient *>{userClient}, vector<bool>{false}, rq.mode);
             Server::listRoom.push_back(newRoom);
             userClient->setRoom(newRoom);
             rp.accept = true;
@@ -336,7 +335,7 @@ void Server::rq_action(char *rq_action, UserClient *&userClient) {
     // if target update
     bool check = true;
 
-    if (room->getGame()->receivAction(rq, userClient, room->char_list_msg)) {
+    if (room->getGame()->receivAction(rq, userClient, room->char_list_msg, room->getMode())) {
         if(room->getGame()->isEndGame()) {
 
             room->endGame();
@@ -398,6 +397,7 @@ struct update_game Server::to_struct_update_game(Room *&room) {
 struct update_target Server::to_struct_update_target(Room *&room) {
     struct update_target res;
     res.target = room->getGame()->getTarget();
+    res.mode = room->getMode();
     return res;
 }
 
@@ -490,7 +490,7 @@ void Server::sendToClient(int connfd, char *send_message) {
     if(sendBytes < 0) {
         perror("Error");
     }
-
+    
     cout << "\nSend: " << "\n{\n" << send_message << "\n}\n";
 }
 

@@ -46,7 +46,7 @@ void CreateRoomWindow::drawTo(sf::RenderTarget &target) {
     this->roomname->drawTo(target);
 }
 
-bool CreateRoomWindow::submitPressed(char *message, int *fail_type) {
+bool CreateRoomWindow::submitPressed(char *message, int *fail_type, std::string mode) {
     if(this->submit_btn->isPressed()) {
         string s_roomname = this->roomname->getText();
 
@@ -57,6 +57,7 @@ bool CreateRoomWindow::submitPressed(char *message, int *fail_type) {
 
         rq_create_room rq;
         rq.name = s_roomname;
+        rq.mode = mode;
         *fail_type = 0;
         std::string char_list_msg="";
         struct_to_message(&rq, RQ_CREATE_ROOM, message, char_list_msg);
