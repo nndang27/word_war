@@ -20,7 +20,7 @@ private:
     // Button *createRoom_btn;
     Button *joinRoom_btn;
     Button *mode_btn;
-
+    Button *rankng_btn;
     
     std::vector<RoomBox *> listRoom;
 
@@ -45,6 +45,7 @@ public:
 
     bool joinPressed(char *message);
     bool chooseModePressed();
+    bool watchingRankedunPressed();
     // bool createRoomPressed();
 };
 

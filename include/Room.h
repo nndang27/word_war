@@ -47,7 +47,7 @@ public:
     void userDisconnectWhileInGame(UserClient *);
     void userReconnectWhileInGame(UserClient *);
 
-    void startGame();
+    void startGame(std::string mode);
     void endGame();
 };
 

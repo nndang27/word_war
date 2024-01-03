@@ -18,12 +18,12 @@ private:
     std::vector<int> y; // 0 - 4
     std::vector<int> point;
     std::vector<int> nb_word_done;
-
+    std::string mode;
     int time_left; //60
     std::string target;
     bool endGame;
 public:
-    Game(std::vector<UserClient *>);
+    Game(std::vector<UserClient *>, std::string mode);
     virtual ~Game();
 
     const bool getEndGame() const;

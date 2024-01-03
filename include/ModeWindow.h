@@ -6,7 +6,7 @@
 
 class ModeWindow {
 protected:
-    Button  *back_btn, *easy_mode_btn, *hard_mode_btn;
+    Button  *back_btn, *easy_mode_btn, *hard_mode_btn, *detroy_mode_btn;
     sf::Text *main;
     
 public:
@@ -20,6 +20,7 @@ public:
     void drawTo(sf::RenderTarget &target);
     bool easyModePressed(char *message, int *fail_type);
     bool hardModePressed(char *message, int *fail_type);
+    bool detroyModePressed(char *message, int *fail_type);
     bool backPressed();
     
 };

@@ -159,7 +159,7 @@ bool RoomWindow::readyPressed(char* message)
     return false;
 }
 
-bool RoomWindow::startPressed(char* message)
+bool RoomWindow::startPressed(char* message, std::string mode)
 {
     if (!this->startable()) {
         return false;
@@ -167,6 +167,7 @@ bool RoomWindow::startPressed(char* message)
 
     if (this->start_btn->isPressed()) {
         rq_start rq;
+        rq.mode = mode;
         std::string char_list_msg="";
         struct_to_message(&rq, RQ_START, message, char_list_msg);
         return true;

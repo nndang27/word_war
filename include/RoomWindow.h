@@ -47,7 +47,7 @@ public:
 
     bool backPressed(char *message);
     bool readyPressed(char *message);
-    bool startPressed(char *message);
+    bool startPressed(char *message, std::string mode);
 
     bool startable();
 };

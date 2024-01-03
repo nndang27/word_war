@@ -8,11 +8,17 @@
 
 using namespace std;
 
-Game::Game(vector<UserClient *> listUser) {
+Game::Game(vector<UserClient *> listUser, std::string mode) {
     this->listUser = listUser;
-
+    this->mode = mode;
     //Game Logic
-    this->time_left = GAME_LENGTH;
+    if(mode.compare("detroy")==0){
+        this->time_left = 40;
+    }
+    else{
+        this->time_left = GAME_LENGTH;
+    }
+    
 
     vector<int> x_pos{2, 4, 2, 4};
     vector<int> y_pos{1, 1, 2, 2};
@@ -50,7 +56,13 @@ string Game::getTarget() {
 }
 
 void Game::updateRandomTarget() {
-    this->target = Server::listTarget.at(rand() % NB_TARGET);
+    if(this->mode.compare("detroy")==0){
+        this->target = Server::listTarget.at(24 + rand() % 17);
+    }
+    else{
+        this->target = Server::listTarget.at(rand() % 23);
+    }
+    
     fill(this->nb_word_done.begin(), this->nb_word_done.end(), 0);
 }
 
@@ -59,9 +71,17 @@ void Game::secondPass() {
 }
 
 bool Game::isEndGame() {
-    if(this->time_left <= 0 || (*max_element(this->point.begin(), this->point.end()) >= MAX_POINT)) {
-        return true;
-    } 
+    if(this->mode.compare("detroy")==0){
+        if(this->time_left <= 0 || (*max_element(this->point.begin(), this->point.end()) >= 6)) {
+            return true;
+        } 
+    }
+    else{
+        if(this->time_left <= 0 || (*max_element(this->point.begin(), this->point.end()) >= MAX_POINT)) {
+            return true;
+        } 
+    }
+
     return false;
 }
 
@@ -108,7 +128,7 @@ bool Game::receivAction(struct rq_action rq, UserClient *&userClient, std::strin
         }
 
         if(this->y.at(position) == 0 ) {
-            if(mode.compare("hard")==0){
+            if(mode.compare("hard")==0 || mode.compare("detroy")==0){
                 now_char = '`' + values[this->x.at(position)-1];
             }
             else{
@@ -116,7 +136,7 @@ bool Game::receivAction(struct rq_action rq, UserClient *&userClient, std::strin
             }
             
         } else {
-            if(mode.compare("hard")==0){
+            if(mode.compare("hard")==0 || mode.compare("detroy")==0){
                 now_char = '`' + values[this->y.at(position)*7+this->x.at(position)-2];
             }
             else{
@@ -130,7 +150,12 @@ bool Game::receivAction(struct rq_action rq, UserClient *&userClient, std::strin
         if(this->target.at(this->nb_word_done.at(position)) == now_char) {
             this->nb_word_done.at(position) += 1;
             if (this->nb_word_done.at(position) == this->target.length()) {
-                this->point.at(position) += 1;
+                if(this->mode.compare("detroy")==0){
+                    this->point.at(position) += 3;
+                }
+                else{
+                    this->point.at(position) += 1;
+                }
                 this->updateRandomTarget();
                 return true;
             }

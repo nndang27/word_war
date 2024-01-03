@@ -28,7 +28,8 @@ Server::Server()
 
     bzero(&this->servAddr, sizeof(this->servAddr));
     this->servAddr.sin_family = AF_INET;
-    this->servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    this->servAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    // htonl(INADDR_ANY);
     this->servAddr.sin_port = htons(SERVER_PORT);
 
     if (bind(this->listenfd, (const sockaddr*)&this->servAddr, sizeof(this->servAddr))) {
@@ -314,8 +315,13 @@ void Server::rq_ready(UserClient *&userClient) {
     Server::updateRoom(room_target);
 }
 
-void Server::rq_start(Room *room) {
-    room->startGame();
+void Server::rq_start(Room *room, char *rq_start_room) {
+    cout<<"fffffffffffffffff\n";
+    cout<<rq_start_room<<"\n";
+    struct rq_start rq = message_to_rq_start(rq_start_room);
+    cout<<"kkkkkkkkkkkkkkkkkkkkk\n";
+    cout<<rq.mode<<"\n";
+    room->startGame(rq.mode);
 
     struct start rp;
     char send_msg[BUFF_SIZE + 1];
@@ -587,7 +593,7 @@ void* Server::routine1(void *input) {
             break;
 
         case RQ_START:
-            Server::rq_start(userClient->getRoom());
+            Server::rq_start(userClient->getRoom(), rcv_message);
             break;
         
         case RQ_ACTION:

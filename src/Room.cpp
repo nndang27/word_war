@@ -119,8 +119,10 @@ bool Room::isIngame() {
     return this->ingame;
 }
 
-void Room::startGame() {
-    this->game = new Game(this->listUser);
+void Room::startGame(std::string mode) {
+    cout<<"xxxxxxxxxxxxx\n";
+    cout<<mode<<"\n";
+    this->game = new Game(this->listUser, mode);
     this->ingame = true;
     for(auto client: this->listUser) {
         client->getUser()->setInGame(true);

@@ -116,6 +116,7 @@ struct rq_ready{
 
 struct rq_start{
     MessageType type = RQ_START;
+    std::string mode;
 };
 
 struct start {
@@ -166,6 +167,8 @@ rp_logout message_to_rp_logout(char *message);
 
 rq_create_room message_to_rq_create_room(char *message);
 rp_create_room message_to_rp_create_room(char *message);
+
+rq_start message_to_rq_start(char *message);
 
 rq_join_room message_to_rq_join_room(char *message);
 rp_join_room message_to_rp_join_room(char *message);

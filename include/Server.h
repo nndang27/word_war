@@ -45,7 +45,7 @@ public:
     static void rq_exitRoom(UserClient *&userClient);
     static void rq_joinRoom(char *rq_joinRoom, char *rp_joinRoom, UserClient *&userClient);
     static void rq_ready(UserClient *&userClient);
-    static void rq_start(Room *room);
+    static void rq_start(Room *room, char *rq_start_room);
     static void rq_action(char *rq_action, UserClient *&userClient);
     static void disconnect(UserClient *&userClient);
     static void reconnect(UserClient *&userClient, User *user);

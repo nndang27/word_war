@@ -11,7 +11,8 @@ void Client::initNetwork()
 
     bzero(&this->servAddr, sizeof(this->servAddr));
     this->servAddr.sin_family = AF_INET;
-    this->servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    this->servAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    // htonl(INADDR_ANY);
     this->servAddr.sin_port = htons(SERVER_PORT);
 }
 
@@ -270,6 +271,12 @@ void Client::pollEvents()
                         this->state = CREATEROOM;
 
                 }
+                if (this->createModeWindow->detroyModePressed(send_msg, &fail_type)) {
+                        // this->sendToServer(this->clientfd, send_msg);
+                        // this->rcvFromServer(this->clientfd, rcv_msg);
+                        this->state = CREATEROOM;
+
+                }
                 break;
             }
             break;
@@ -334,7 +341,7 @@ void Client::pollEvents()
                     this->state = LOBBY;
                 } else if (this->roomWindow->readyPressed(send_msg)) {
                     this->sendToServer(this->clientfd, send_msg);
-                } else if (this->roomWindow->startPressed(send_msg)) {
+                } else if (this->roomWindow->startPressed(send_msg, this->createModeWindow->mode)) {
                     this->sendToServer(this->clientfd, send_msg);
                 }
 
@@ -696,6 +703,9 @@ bool Client::msg_handle(char *message) {
                 auto splited_line = split(c_temp, "\n");
                 std::string values = splited_line.at(3);
                 if(values.compare("hard") == 0){
+                    this->rp_resetCharacterBox(c_temp);
+                }
+                if(values.compare("detroy") == 0){
                     this->rp_resetCharacterBox(c_temp);
                 }
                 

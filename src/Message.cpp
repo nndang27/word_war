@@ -253,7 +253,8 @@ void struct_to_message(void *p, MessageType type, char *output, std::string& cha
     case RQ_START:
     {
         auto *struct_obj = (rq_start *)p;
-        final << struct_obj->type << "\n\0";
+        final << struct_obj->type << "\n";
+        final << struct_obj->mode << "\n\0";
         temp = final.str();
         strcpy(output, temp.c_str());
         break;
@@ -453,6 +454,13 @@ rq_create_room message_to_rq_create_room(char *message) {
     return res;
 }
 
+rq_start message_to_rq_start(char *message) {
+    auto splited_line = split(message, "\n");
+    rq_start res;
+    res.mode = splited_line.at(1);
+    return res;
+}
+ 
 rp_create_room message_to_rp_create_room(char *message) {
     auto splited_line = split(message, "\n");
     rp_create_room res;
