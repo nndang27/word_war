@@ -147,7 +147,7 @@ void Room::endGame() {
         this->user_point_dict[this->listUser.at(i)->getUser()->getUsername()] += res.point.at(i);
     }
     res.user_point_dict = this->user_point_dict;
-
+    Server::update_list_ranked(res);
     struct_to_message(&res, END_GAME, send_msg, char_list_msg);
 
     for(auto dClient: this->disconnectedClient) {
@@ -158,7 +158,8 @@ void Room::endGame() {
         //deallocate
         delete dClient;
     }
-
+    cout<<"1212121212121222222222222222222222\n";
+    cout<<send_msg<<"\n";
     // Send end game message to online client
     for (auto client:room->getListUser()) {
         Server::sendToClient(client->getWritefd(), send_msg);

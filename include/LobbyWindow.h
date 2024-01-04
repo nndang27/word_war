@@ -45,7 +45,7 @@ public:
 
     bool joinPressed(char *message);
     bool chooseModePressed();
-    bool watchingRankedunPressed();
+    bool watchingRankedunPressed(char *message);
     // bool createRoomPressed();
 };
 

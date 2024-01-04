@@ -5,6 +5,7 @@ using namespace std;
 
 UserClient::UserClient(User *user) {
     this->user = user;
+    // this->room = nullptr;
 }
 
 UserClient::~UserClient() {}

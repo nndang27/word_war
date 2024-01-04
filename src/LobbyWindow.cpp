@@ -23,7 +23,8 @@ LobbyWindow::LobbyWindow(sf::Font *font) {
     this->mode_btn = new Button(400, 450, 150, 100, font, "Mode", 26, sf::Color::Black, sf::Color::Magenta);
     this->joinRoom_btn = new Button(600, 450, 150, 100, font, "Join", 26, sf::Color::Black, sf::Color::Magenta);
     // this->createRoom_btn = new Button(800, 450, 150, 100, font, "Create", 26, sf::Color::Black, sf::Color::Magenta);
-
+    this->rankng_btn = new Button(200, 450, 150, 100, font, "Ranked", 26, sf::Color::Black, sf::Color::Magenta);
+    
     float x_box[4] = {100, 300, 500, 700};
     float y_box = 200;
     float x_size = 170;
@@ -50,6 +51,7 @@ void LobbyWindow::update(sf::Vector2f mousePos) {
     // this->createRoom_btn->update(mousePos);
     this->joinRoom_btn->update(mousePos);
     this->mode_btn->update(mousePos);
+    this->rankng_btn->update(mousePos);
 }
 
 void LobbyWindow::drawTo(sf::RenderTarget &target) {
@@ -59,6 +61,7 @@ void LobbyWindow::drawTo(sf::RenderTarget &target) {
     // this->createRoom_btn->drawTo(target);
     this->joinRoom_btn->drawTo(target);
     this->mode_btn->drawTo(target);
+    this->rankng_btn->drawTo(target);
 
     for(int i = 0; i < 4; i++) {
         this->listRoom.at(i)->drawTo(target);
@@ -77,6 +80,16 @@ bool LobbyWindow::logoutPressed(char *message) {
 
 bool LobbyWindow::chooseModePressed() {
     if (this->mode_btn->isPressed()) {
+        return true;
+    }
+    return false;
+}
+
+bool LobbyWindow::watchingRankedunPressed(char *message) {
+    if (this->rankng_btn->isPressed()) {
+        rq_watch_ranked rq;
+        std::string char_list_msg="";
+        struct_to_message(&rq, RQ_WATCH_RANKED, message, char_list_msg);
         return true;
     }
     return false;

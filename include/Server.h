@@ -11,6 +11,7 @@
 #include <vector>
 #include <string.h>
 #include <fstream>
+#include <unordered_map>
 
 #include <arpa/inet.h> // in_addr
 #include <sys/socket.h> // socklen_t
@@ -30,7 +31,7 @@ public:
     static std::vector<User *> listUser;
     static std::vector<Room *> listRoom;
     static std::vector<UserClient *> listClient;
-
+    static std::unordered_map<std::string, std::string> listScore;
     Server();
     ~Server();
 
@@ -44,6 +45,7 @@ public:
     static void rq_createRoom(char *rq_createRoom, char *rp_createRoom, UserClient *&userClient);
     static void rq_exitRoom(UserClient *&userClient);
     static void rq_joinRoom(char *rq_joinRoom, char *rp_joinRoom, UserClient *&userClient);
+    static void rq_watch_ranked(char *rq_watchRanked, char *rp_watchRanked, UserClient *&userClient);
     static void rq_ready(UserClient *&userClient);
     static void rq_start(Room *room, char *rq_start_room);
     static void rq_action(char *rq_action, UserClient *&userClient);
@@ -64,8 +66,10 @@ public:
 
     static void rcvFromClient(int connfd, char *rcv_message);
     static void sendToClient(int connfd, char *send_message);
+    static void update_list_ranked(const end_game& res);
     void loadUserData(std::string path);
     void loadTarget(std::string path);
+    void loadScore(std::string path);
 
     static void* routine1(void *);
     static void* routine2(void *);

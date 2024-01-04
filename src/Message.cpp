@@ -16,7 +16,8 @@ std::vector<int> msg_length
 6, 4,//UPDATE_GAME, UPDATE_TARGET, 
 4,//END_GAME,
 1,//RQ_EXIT_ROOM
-2,//RQ_CHOOSE_MODE
+2,//RQ_CHOOSE_MODE,
+1,2,//RQ_WATCH_RANKED, RP_WATCH_RANKED
 };
 
 vector<string> split(char *input, string delimiter) {
@@ -131,6 +132,26 @@ void struct_to_message(void *p, MessageType type, char *output, std::string& cha
         final << struct_obj->type << "\n";
         final << struct_obj->mode << "\n\0";
 
+        temp = final.str();
+        strcpy(output, temp.c_str());
+        break;
+    }
+    case RQ_WATCH_RANKED:
+    {
+        auto *struct_obj = (rq_watch_ranked *)p;
+        final << struct_obj->type << "\n\0";
+        temp = final.str();
+        strcpy(output, temp.c_str());
+        break;
+    }
+    case RP_WATCH_RANKED:
+    {
+        auto *struct_obj = (rp_watch_ranked *)p;
+        final << struct_obj->type << "\n";
+        for (const auto& entry : struct_obj->listScore) {
+            final << entry.first << " "<<entry.second<<"\n";
+        }
+        final<<"\0";
         temp = final.str();
         strcpy(output, temp.c_str());
         break;
@@ -453,7 +474,24 @@ rq_create_room message_to_rq_create_room(char *message) {
     res.mode = splited_line.at(2);
     return res;
 }
-
+rp_watch_ranked message_to_rp_watch_ranked(char *message) {
+    auto splited_line = split(message, "\n");
+    rp_watch_ranked res;
+    int i=0;
+    for (const auto& line : splited_line) {
+        if( i==0){
+            i+=1;
+            continue;
+        }
+        string username = line.substr(0, line.find(" "));
+        string total_point = line.substr(line.find(" ") + 1, line.length());
+        if(total_point.compare("")==0){
+            continue;
+        }
+        res.listScore[username] = total_point;
+    }
+    return res;
+}
 rq_start message_to_rq_start(char *message) {
     auto splited_line = split(message, "\n");
     rq_start res;

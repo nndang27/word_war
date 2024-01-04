@@ -2,6 +2,7 @@
 #include <random>
 #include <vector>
 #include <algorithm>
+#include <stdlib.h>
 using namespace std;
 
 void Client::initNetwork()
@@ -61,6 +62,9 @@ void Client::initCreateRoomWindow() {
 void Client::initModeWindow() {
     this->createModeWindow = new ModeWindow(this->font);
 }
+void Client::initRankedWindow() {
+    this->createRankedWindow = new RankedWindow(this->font);
+}
 
 void Client::initJoinWindow() {
     this->joinWindow = new JoinWindow(this->font);
@@ -94,6 +98,7 @@ Client::Client()
     this->initNotification();
     this->initCreateRoomWindow();
     this->initModeWindow();
+    this->initRankedWindow();
     this->initJoinWindow();
     this->initRoomWindow();
     this->initGameWindow();
@@ -110,6 +115,7 @@ Client::~Client()
     delete this->notification;
     delete this->createRoomWindow;
     delete this->createModeWindow;
+    delete this->createRankedWindow;
 }
 
 const bool Client::running() const
@@ -237,13 +243,15 @@ void Client::pollEvents()
                     this->joinWindow->refresh();
                     this->state = JOIN;
                 }
-                // if (this->lobbyWindow->createRoomPressed()) {
-                //     this->state = CREATEROOM;
-                //     this->createRoomWindow->refresh();
-                // }
+
                 if (this->lobbyWindow->chooseModePressed()) {
                     this->state = MODE;
-                    // this->createModeWindow->refresh();
+                }
+                if (this->lobbyWindow->watchingRankedunPressed(send_msg)) {
+                    this->sendToServer(this->clientfd, send_msg);
+                    this->rcvFromServer(this->clientfd, rcv_msg);
+                    this->rp_watchRanked(rcv_msg);
+                    this->state = RANKED;
                 }
                 break;
             
@@ -276,6 +284,16 @@ void Client::pollEvents()
                         // this->rcvFromServer(this->clientfd, rcv_msg);
                         this->state = CREATEROOM;
 
+                }
+                break;
+            }
+            break;
+        case RANKED:
+            switch (ev.type)
+            {
+            case sf::Event::MouseButtonPressed:
+                if (this->createRankedWindow->backPressed()) {
+                    this->state = LOBBY;
                 }
                 break;
             }
@@ -397,6 +415,9 @@ void Client::update()
     case MODE:
         this->createModeWindow->update(this->mousePosView);
         break;
+    case RANKED:
+        this->createRankedWindow->update(this->mousePosView);
+    break;
     case JOIN:
         this->joinWindow->update(this->mousePosView);
         break;
@@ -439,6 +460,9 @@ void Client::render()
     case MODE:
         this->createModeWindow->drawTo(*this->window);
         break;
+    case RANKED:
+        this->createRankedWindow->drawTo(*this->window);
+        break;
     case JOIN:
         this->joinWindow->drawTo(*this->window);
         break;
@@ -474,6 +498,7 @@ void Client::rcvFromServer(int fd, char *buff) {
     }
     buff[ret] = '\0';
     cout << "\nReceiv: " << "\n{\n" << buff << "\n}\n";
+    cout<<"+++++++++++++++++++++++++++++++++++++++++\n";
 }
 
 void Client::rp_register(char *rq_message)
@@ -513,6 +538,27 @@ void Client::rp_logout(char *rq_message) {
     } else {
         this->notification->setText("Logout Fail!!", 50, rp.notification, 30);
         this->next_state = LOBBY;
+    }
+}
+
+
+void Client::rp_watchRanked(char *message) {
+    struct rp_watch_ranked rp = message_to_rp_watch_ranked(message);
+    this->createRankedWindow->listScore.clear();
+    this->createRankedWindow->listScore.insert(rp.listScore.begin(), rp.listScore.end());
+
+    std::vector<std::pair<std::string, std::string>> pairs(this->createRankedWindow->listScore.begin(), this->createRankedWindow->listScore.end());
+    std::sort(pairs.begin(), pairs.end(), [](const auto& lhs, const auto& rhs) {
+        return stoi(lhs.second) > stoi(rhs.second);
+    });
+    int count = 0;
+    for (const auto& entry : pairs) {
+        // std::cout << "Key: " << entry.first << ", Value: " << entry.second << std::endl;
+        this->createRankedWindow->getUserScoreList().at(count)->setString(std::to_string(count+1)+"."+entry.first+" "+entry.second );
+        ++count;
+        if (count >= 10) {
+            break;
+        }
     }
 }
 
@@ -563,6 +609,8 @@ void Client::rp_joinRoom(char *message) {
         this->next_state = LOBBY;
     }
 }
+
+
 
 void Client::rp_end_game(char *message) {
     struct end_game res = message_to_end_game(message);
@@ -650,11 +698,12 @@ UserClient* Client::getUserClient() {
 
 void getmessage(vector<string> *input, MessageType type, char *msg_out) {
     string temp = "";
-    for(int i = 0; i < msg_length.at(type); i++) {
+    // msg_length.at(type)
+    for(int i = 0; i < input->size(); i++) {
         temp += input->at(i) + "\n";
     }
     strcpy(msg_out, temp.c_str());
-    input->erase(input->begin(), input->begin() + msg_length.at(type));
+    input->erase(input->begin(), input->begin() + input->size());
 }
 
 bool Client::msg_handle(char *message) {
@@ -696,6 +745,10 @@ bool Client::msg_handle(char *message) {
                 getmessage(&splited_line, RP_JOIN_ROOM, c_temp);
                 this->rp_joinRoom(c_temp);
                 break;
+            // case RP_WATCH_RANKED:
+            //     getmessage(&splited_line, RP_WATCH_RANKED, c_temp);
+            //     this->rp_watchRanked(c_temp);
+            //     break;
             case UPDATE_TARGET:
                 getmessage(&splited_line, UPDATE_TARGET, c_temp);
                 // auto splited_line = split(c_temp, "\n");

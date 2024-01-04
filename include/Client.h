@@ -25,6 +25,8 @@
 #include "../include/RoomWindow.h"
 #include "../include/UserClient.h"
 #include "../include/GameWindow.h"
+#include "../include/RankedWindow.h"
+
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
@@ -41,6 +43,7 @@ enum StateTypes
     GAME,
     NOTIFICATION,
     MODE,
+    RANKED,
 };
 
 class Client {
@@ -71,6 +74,7 @@ private:
     LoginWindow *loginWindow;
     LobbyWindow *lobbyWindow;
     ModeWindow *createModeWindow;
+    RankedWindow *createRankedWindow;
     Notification *notification;
     CreateRoomWindow *createRoomWindow;
     JoinWindow *joinWindow;
@@ -91,6 +95,7 @@ private:
     void initJoinWindow();
     void initRoomWindow();
     void initGameWindow();
+    void initRankedWindow();
     void initFont();
 
 public:
@@ -116,6 +121,7 @@ public:
     void rp_logout(char *rq_message);
     void rp_createRoom(char *rq_message);
     void rp_joinRoom(char *rq_message);
+    void rp_watchRanked(char *rq_message);
     void rp_update_lobby(char *message);
     void rp_update_room(char *message);
     void rp_update_game(char *message);
@@ -123,9 +129,7 @@ public:
     void rp_resetCharacterBox(char *message);
     void rp_start_game();
     void rp_end_game(char *message);
-
     bool msg_handle(char *message);
-
     static void* routine1(void *);
     static void* routine2(void *); 
 };

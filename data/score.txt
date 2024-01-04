@@ -1,0 +1,13 @@
+a 12
+long 0
+b 11
+1 0
+3 0
+c 6
+assdf 0
+aa 8
+asdf 0
+2 0
+nndang 8
+4 0
+aaa 0

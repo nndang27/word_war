@@ -11,6 +11,7 @@
 #define fontUpheavttPath "/home/nndang27/Downloads/HUST_IT4062_ThucHanhLapTrinhMang-main/fonts/upheavtt.ttf"
 #define fontPerfectDosPath "/home/nndang27/Downloads/HUST_IT4062_ThucHanhLapTrinhMang-main/fonts/Perfect_DOS_VGA_437.ttf"
 #define userDataPath "/home/nndang27/Downloads/HUST_IT4062_ThucHanhLapTrinhMang-main/data/password.txt"
+#define scorePath "/home/nndang27/Downloads/HUST_IT4062_ThucHanhLapTrinhMang-main/data/score.txt"
 #define targetPath "/home/nndang27/Downloads/HUST_IT4062_ThucHanhLapTrinhMang-main/data/target.txt"
 #define NB_TARGET 40
 #define BUFF_SIZE 1024

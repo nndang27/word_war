@@ -22,7 +22,8 @@ START,
 RQ_ACTION,
 UPDATE_GAME, UPDATE_TARGET, 
 END_GAME,
-RQ_EXIT_ROOM, RQ_CHOOSE_MODE};
+RQ_EXIT_ROOM, RQ_CHOOSE_MODE,
+RQ_WATCH_RANKED,RP_WATCH_RANKED};
 
 enum Action {UP, DOWN, LEFT, RIGHT, SPACE};
 
@@ -59,6 +60,15 @@ struct rp_login {
 
 struct rq_logout {
     MessageType type = RQ_LOGOUT;
+};
+
+struct rq_watch_ranked {
+    MessageType type = RQ_WATCH_RANKED;
+};
+
+struct rp_watch_ranked {
+    MessageType type = RP_WATCH_RANKED;
+    std::unordered_map<std::string, std::string> listScore;
 };
 
 struct rp_logout {
@@ -172,6 +182,9 @@ rq_start message_to_rq_start(char *message);
 
 rq_join_room message_to_rq_join_room(char *message);
 rp_join_room message_to_rp_join_room(char *message);
+
+rp_watch_ranked message_to_rp_watch_ranked(char *message);
+
 
 update_lobby message_to_update_lobby(char *message);
 update_room message_to_update_room(char *message);

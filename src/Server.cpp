@@ -4,6 +4,7 @@
 #include <cstring>
 #include <vector>
 #include <random>
+#include <unordered_map>
 
 using namespace std;
 
@@ -11,11 +12,13 @@ vector<User *> Server::listUser;
 vector<Room *> Server::listRoom;
 vector<string> Server::listTarget;
 vector<UserClient *> Server::listClient;
+unordered_map<std::string, std::string> Server::listScore;
 
 Server::Server()
 {
     this->loadUserData(userDataPath);
     this->loadTarget(targetPath);
+    this->loadScore(scorePath);
 
     this->listenfd = socket(AF_INET, SOCK_STREAM, 0);
     if (this->listenfd == -1) {
@@ -55,6 +58,7 @@ Server::~Server()
         delete room;
     }
     Server::listRoom.clear();
+    Server::listScore.clear();
 }
 
 void Server::run()
@@ -123,9 +127,24 @@ void Server::loadUserData(string path)
     while (getline(ReadFile, line)) {
         string username = line.substr(0, line.find(delimiter));
         string password = line.substr(line.find(delimiter) + 1, line.length());
+        // string total_point = line.substr(line.rfind(delimiter)+1, line.length());
 
         User* user = new User(username, password);
         Server::listUser.push_back(user);
+    }
+    ReadFile.close();
+}
+
+void Server::loadScore(string path)
+{
+    ifstream ReadFile(path);
+    string line;
+    string delimiter = " ";
+
+    while (getline(ReadFile, line)) {
+        string username = line.substr(0, line.find(delimiter));
+        string total_point = line.substr(line.find(delimiter) + 1, line.length());
+        Server::listScore[username] = total_point;
     }
     ReadFile.close();
 }
@@ -158,10 +177,14 @@ void Server::rq_register(char *rq_register, char *rp_register)
 
         User* u = new User(rq.username, rq.password);
         Server::listUser.push_back(u);
-
+        Server::listScore[rq.username] = "0";
         ofstream WriteFile;
         WriteFile.open(userDataPath, std::ios_base::app);
         WriteFile << rq.username << " " << rq.password << "\n";
+
+        ofstream WriteFile2;
+        WriteFile2.open(scorePath, std::ios_base::app);
+        WriteFile2 << rq.username << " 0" << "\n";
     }
     std::string char_list_msg="";
     struct_to_message(&rp, RP_REGISTER, rp_register, char_list_msg);
@@ -298,6 +321,14 @@ void Server::rq_joinRoom(char *rq_joinRoom, char *rp_joinRoom, UserClient *&user
     struct_to_message(&rp, RP_JOIN_ROOM, rp_joinRoom, char_list_msg);
 }
 
+void Server::rq_watch_ranked(char *rq_watchRanked, char *rp_watchRanked, UserClient *&userClient) {
+    rp_watch_ranked rp;
+    rp.listScore.insert(Server::listScore.begin(), Server::listScore.end());
+    std::string char_list_msg="";
+    struct_to_message(&rp, RP_WATCH_RANKED, rp_watchRanked, char_list_msg);
+}
+
+
 void Server::rq_exitRoom(UserClient *&userClient) {
     Room *room_target = userClient->getRoom();
 
@@ -316,11 +347,7 @@ void Server::rq_ready(UserClient *&userClient) {
 }
 
 void Server::rq_start(Room *room, char *rq_start_room) {
-    cout<<"fffffffffffffffff\n";
-    cout<<rq_start_room<<"\n";
     struct rq_start rq = message_to_rq_start(rq_start_room);
-    cout<<"kkkkkkkkkkkkkkkkkkkkk\n";
-    cout<<rq.mode<<"\n";
     room->startGame(rq.mode);
 
     struct start rp;
@@ -490,6 +517,22 @@ void Server::rcvFromClient(int connfd, char *rcv_message) {
 
     cout << "\nReceive: " << "\n{\n" << rcv_message << "\n}\n";
 }
+void Server::update_list_ranked(const end_game& res) {
+    // Server::listScore
+    for(int i = 0; i < res.point.size(); i++) {
+        // cout<<res.username.at(i)<<" "<<res.point.at(i)<<"\n";
+        Server::listScore[res.username.at(i)] = std::to_string(std::stoi(Server::listScore[res.username.at(i)]) + res.point.at(i) );
+    }
+    ofstream WriteFile2;
+    // WriteFile2.open(scorePath, std::ios_base::app);
+    WriteFile2.open(scorePath, std::ios::out | std::ios::trunc);
+    for (const auto& entry : Server::listScore) {
+        WriteFile2 << entry.first << " " << entry.second<< "\n";
+    }
+
+    WriteFile2.close();
+}
+
 
 void Server::sendToClient(int connfd, char *send_message) {
     int sendBytes = send(connfd, send_message, strlen(send_message), 0);
@@ -503,19 +546,22 @@ void Server::sendToClient(int connfd, char *send_message) {
 void Server::disconnect(UserClient *&userClient) {
     Server::listClient.erase(remove(Server::listClient.begin(), Server::listClient.end(), userClient), Server::listClient.end());
     userClient->getUser()->setState(OFFLINE);
-    if(userClient->getRoom()->isIngame()) {
-        userClient->getRoom()->userDisconnectWhileInGame(userClient);
-    } else {
-        //If user in a room
-        Room *room = userClient->getRoom();
-        if(room != nullptr) {
-            room->removeUser(userClient);
-            Server::updateRoom(room);
-            Server::deleteEmptyRoom();
-            Server::updateLobby();
-        }
-        delete userClient;
+    if (userClient->getRoom() != nullptr) {
+            if(userClient->getRoom()->isIngame()) {
+                userClient->getRoom()->userDisconnectWhileInGame(userClient);
+            } else {
+                //If user in a room
+                Room *room = userClient->getRoom();
+                if(room != nullptr) {
+                    room->removeUser(userClient);
+                    Server::updateRoom(room);
+                    Server::deleteEmptyRoom();
+                    Server::updateLobby();
+                }
+                delete userClient;
+            }
     }
+
     
 }
 
@@ -556,7 +602,9 @@ void* Server::routine1(void *input) {
         switch (getCode(rcv_message)) {
         case RQ_EXIT:
             exit_check = true;
+            cout<<"11111111111111111\n";
             if(userClient->getUser() != nullptr) {
+                cout<<"22222222222222222\n";
                 Server::disconnect(userClient);
             }
             break;
@@ -583,7 +631,10 @@ void* Server::routine1(void *input) {
             Server::rq_joinRoom(rcv_message, send_message, userClient);
             Server::sendToClient(connfd, send_message);
             break;
-
+        case RQ_WATCH_RANKED:
+            Server::rq_watch_ranked(rcv_message, send_message, userClient);
+            Server::sendToClient(connfd, send_message);
+            break;
         case RQ_EXIT_ROOM:
             Server::rq_exitRoom(userClient);
             break;
